@@ -1,5 +1,7 @@
 {
   "scripts": {
+    "name": "WTWR backend express",
+    "author": "Madison Callahan",
     "start": "node app.js",
     "dev": "nodemon app.js",
     "lint": "eslint .",
