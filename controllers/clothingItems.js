@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const ClothingItem = require("../models/clothingItem");
+const mongoose = require('mongoose');
+const ClothingItem = require('../models/clothingItem');
 
 // const {
 //   ERROR_BAD_REQUEST,
@@ -13,11 +13,11 @@ const createItem = (req, res) => {
   const owner = req.user._id;
   // min and maxlength validation
   if (!name || name.length < 2) {
-    return res.status(400).send({ message: "Name too short" });
+    return res.status(400).send({ message: 'Name too short' });
   }
 
   if (name.length > 30) {
-    return res.status(400).send({ message: "Name too long" });
+    return res.status(400).send({ message: 'Name too long' });
   }
   return ClothingItem.create({
     name,
@@ -27,13 +27,13 @@ const createItem = (req, res) => {
   })
     .then((item) => res.status(201).send(item))
     .catch((err) => {
-      if (err.name === "ValidationError") {
-        return res.status(400).send({ message: "Invalid item data" });
+      if (err.name === 'ValidationError') {
+        return res.status(400).send({ message: 'Invalid item data' });
       }
 
       return res
         .status(500)
-        .send({ message: "An error has occurred on the server." });
+        .send({ message: 'An error has occurred on the server.' });
     });
 };
 
@@ -42,7 +42,7 @@ const getItems = (req, res) => {
   ClothingItem.find({})
     .then((items) => res.status(200).send(items))
     .catch((error) => {
-      res.status(500).send({ message: "Get items failed", error });
+      res.status(500).send({ message: 'Get items failed', error });
     });
 };
 
@@ -56,7 +56,7 @@ const updateItem = (req, res) => {
     .orFail()
     .then((item) => res.status(200).send({ data: item }))
     .catch((error) => {
-      res.status(500).send({ message: "Error from updateItem", error });
+      res.status(500).send({ message: 'Error from updateItem', error });
     });
 };
 
@@ -66,20 +66,20 @@ const deleteItem = (req, res) => {
   const { itemId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
-    return res.status(400).send({ message: "Invalid item ID format" });
+    return res.status(400).send({ message: 'Invalid item ID format' });
   }
 
   return ClothingItem.findByIdAndDelete(itemId)
     .then((item) => {
       if (!item) {
-        return res.status(404).send({ message: "Item not found" });
+        return res.status(404).send({ message: 'Item not found' });
       }
 
       // send the deleted item back as JSON
       return res.send(item);
     })
     .catch(() => {
-      res.status(500).send({ message: "An error has occurred on the server." });
+      res.status(500).send({ message: 'An error has occurred on the server.' });
     });
 };
 
@@ -89,7 +89,7 @@ const likeItem = (req, res) => {
   const { itemId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
-    return res.status(400).send({ message: "Invalid item ID format" });
+    return res.status(400).send({ message: 'Invalid item ID format' });
   }
 
   return ClothingItem.findByIdAndUpdate(
@@ -99,13 +99,13 @@ const likeItem = (req, res) => {
   )
     .then((item) => {
       if (!item) {
-        return res.status(404).send({ message: "Item not found" });
+        return res.status(404).send({ message: 'Item not found' });
       }
 
       return res.send(item);
     })
     .catch(() => {
-      res.status(500).send({ message: "An error has occurred on the server." });
+      res.status(500).send({ message: 'An error has occurred on the server.' });
     });
 };
 
@@ -114,7 +114,7 @@ const dislikeItem = (req, res) => {
   const { itemId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
-    return res.status(400).send({ message: "Invalid item ID format" });
+    return res.status(400).send({ message: 'Invalid item ID format' });
   }
 
   return ClothingItem.findByIdAndUpdate(
@@ -124,13 +124,13 @@ const dislikeItem = (req, res) => {
   )
     .then((item) => {
       if (!item) {
-        return res.status(404).send({ message: "Item not found" });
+        return res.status(404).send({ message: 'Item not found' });
       }
 
       return res.send(item);
     })
     .catch(() => {
-      res.status(500).send({ message: "An error has occurred on the server." });
+      res.status(500).send({ message: 'An error has occurred on the server.' });
     });
 };
 
