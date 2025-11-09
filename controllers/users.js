@@ -1,10 +1,6 @@
 // const { get } = require('mongoose');
 const User = require("../models/user");
-const {
-  ERROR_BAD_REQUEST,
-  ERROR_NOT_FOUND,
-  ERROR_SERVER,
-} = require("../utils/errorCodes");
+const { ERROR_BAD_REQUEST, ERROR_SERVER } = require("../utils/errorCodes");
 
 // GET /users
 

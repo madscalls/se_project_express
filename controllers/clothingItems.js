@@ -5,7 +5,7 @@ const {
   ERROR_BAD_REQUEST,
   ERROR_NOT_FOUND,
   ERROR_SERVER,
-} = require("../utils/errorCodes.js");
+} = require("../utils/errorCodes");
 
 // CREATE
 const createItem = (req, res) => {
