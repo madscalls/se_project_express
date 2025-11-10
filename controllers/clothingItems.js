@@ -1,11 +1,11 @@
-const mongoose = require("mongoose");
-const ClothingItem = require("../models/clothingItem");
+const mongoose = require('mongoose');
+const ClothingItem = require('../models/clothingItem');
 
 const {
   ERROR_BAD_REQUEST,
   ERROR_NOT_FOUND,
   ERROR_SERVER,
-} = require("../utils/errorCodes");
+} = require('../utils/errorCodes');
 
 // CREATE
 const createItem = (req, res) => {
@@ -13,11 +13,11 @@ const createItem = (req, res) => {
   const owner = req.user._id;
   // min and maxlength validation
   if (!name || name.length < 2) {
-    return res.status(ERROR_BAD_REQUEST).send({ message: "Name too short" });
+    return res.status(ERROR_BAD_REQUEST).send({ message: 'Name too short' });
   }
 
   if (name.length > 30) {
-    return res.status(ERROR_BAD_REQUEST).send({ message: "Name too long" });
+    return res.status(ERROR_BAD_REQUEST).send({ message: 'Name too long' });
   }
   return ClothingItem.create({
     name,
@@ -27,15 +27,15 @@ const createItem = (req, res) => {
   })
     .then((item) => res.status(201).send(item))
     .catch((err) => {
-      if (err.name === "ValidationError") {
+      if (err.name === 'ValidationError') {
         return res
           .status(ERROR_BAD_REQUEST)
-          .send({ message: "Invalid item data" });
+          .send({ message: 'Invalid item data' });
       }
 
       return res
         .status(ERROR_SERVER)
-        .send({ message: "An error has occurred on the server." });
+        .send({ message: 'An error has occurred on the server.' });
     });
 };
 
@@ -43,10 +43,10 @@ const createItem = (req, res) => {
 const getItems = (req, res) => {
   ClothingItem.find({})
     .then((items) => res.status(200).send(items))
-    .catch((error) => {
+    .catch(() => {
       res
         .status(ERROR_SERVER)
-        .send({ message: "An error has occured on the server" });
+        .send({ message: 'An error has occured on the server' });
     });
 };
 
@@ -58,13 +58,13 @@ const deleteItem = (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
     return res
       .status(ERROR_BAD_REQUEST)
-      .send({ message: "Invalid item ID format" });
+      .send({ message: 'Invalid item ID format' });
   }
 
   return ClothingItem.findByIdAndDelete(itemId)
     .then((item) => {
       if (!item) {
-        return res.status(ERROR_NOT_FOUND).send({ message: "Item not found" });
+        return res.status(ERROR_NOT_FOUND).send({ message: 'Item not found' });
       }
 
       // send the deleted item back as JSON
@@ -73,7 +73,7 @@ const deleteItem = (req, res) => {
     .catch(() => {
       res
         .status(ERROR_SERVER)
-        .send({ message: "An error has occurred on the server." });
+        .send({ message: 'An error has occurred on the server.' });
     });
 };
 
@@ -81,57 +81,53 @@ const deleteItem = (req, res) => {
 const likeItem = (req, res) => {
   const { itemId } = req.params;
 
+  // check if ID is valid
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
-    return res
-      .status(ERROR_BAD_REQUEST)
-      .send({ message: "Invalid item ID format" });
+    return res.status(ERROR_BAD_REQUEST).send({ message: 'Invalid item ID ' });
   }
 
+  // if ID is valid procees with database operation
   return ClothingItem.findByIdAndUpdate(
     itemId,
     { $addToSet: { likes: req.user._id } }, // add _id if not already present
     { new: true },
   )
-    .then((item) => {
-      if (!item) {
-        return res.status(ERROR_NOT_FOUND).send({ message: "Item not found" });
+    .orFail()
+    .then((item) => res.send(item))
+    .catch((err) => {
+      if (err.name === 'DocumentNotFoundError') {
+        return res.status(ERROR_NOT_FOUND).send({ message: 'Item not found' });
       }
-
-      return res.send(item);
-    })
-    .catch(() => {
-      res
+      return res
         .status(ERROR_SERVER)
-        .send({ message: "An error has occurred on the server." });
+        .send({ message: 'An error has occurred on the server' });
     });
 };
 
 // unlike
 const dislikeItem = (req, res) => {
   const { itemId } = req.params;
-
+  // check if ID is valid
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
     return res
       .status(ERROR_BAD_REQUEST)
-      .send({ message: "Invalid item ID format" });
+      .send({ message: 'Invalid item ID format' });
   }
-
+  // if ID is valid, proceed with database operation
   return ClothingItem.findByIdAndUpdate(
     itemId,
     { $pull: { likes: req.user._id } }, // remove the user's ID from likes
     { new: true },
   )
-    .then((item) => {
-      if (!item) {
-        return res.status(ERROR_NOT_FOUND).send({ message: "Item not found" });
+    .orFail()
+    .then((item) => res.send(item))
+    .catch((err) => {
+      if (err.name === 'DocumentNotFoundError') {
+        return res.status(ERROR_NOT_FOUND).send({ message: 'Item not found ' });
       }
-
-      return res.send(item);
-    })
-    .catch(() => {
-      res
+      return res
         .status(ERROR_SERVER)
-        .send({ message: "An error has occurred on the server." });
+        .send({ message: 'An error has occurred on the server' });
     });
 };
 
