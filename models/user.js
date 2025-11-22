@@ -5,21 +5,21 @@ const bcrypt = require("bcryptjs");
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
+    required: true,
     minlength: 2,
     maxlength: 30,
-    required: true,
   },
   avatar: {
     type: String,
     required: true,
-    validate: {
-      validator(value) {
-        return validator.isURL(value);
-      },
-      message: "Invalid URL format for avatar",
-    },
+    validate: { validator: validator.isURL, message: "Invalid URL" },
   },
-  email: { type: String, required: true },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    validate: { validator: validator.isEmail, message: "Invalid email" },
+  },
   password: { type: String, required: true, minlength: 8, select: false },
 });
 
@@ -27,19 +27,21 @@ userSchema.statics.findUserByCredentials = function findUserByCredentials(
   email,
   password,
 ) {
-  return this.findOne({ email }).then((user) => {
-    if (!user) {
-      return Promise.reject(new Error("Incorrect email or password"));
-    }
-
-    return bcrypt.compare(password, user.password).then((matched) => {
-      if (!matched) {
+  return this.findOne({ email })
+    .select("+password") //include password field even though its normally hidden
+    .then((user) => {
+      if (!user) {
         return Promise.reject(new Error("Incorrect email or password"));
       }
 
-      return user; // now user is available
+      return bcrypt.compare(password, user.password).then((matched) => {
+        if (!matched) {
+          return Promise.reject(new Error("Incorrect email or password"));
+        }
+
+        return user;
+      });
     });
-  });
 };
 
-module.exports = mongoose.model("User", userSchema);
+module.exports = mongoose.model("user", userSchema);

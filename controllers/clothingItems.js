@@ -5,6 +5,9 @@ const {
   ERROR_BAD_REQUEST,
   ERROR_NOT_FOUND,
   ERROR_SERVER,
+  CREATED,
+  OK,
+  FORBIDDEN,
 } = require("../utils/errorCodes");
 
 // CREATE
@@ -24,7 +27,7 @@ const createItem = (req, res) => {
     weather,
     owner,
   })
-    .then((item) => res.status(201).send(item))
+    .then((item) => res.status(CREATED).send(item))
     .catch((err) => {
       if (err.name === "ValidationError") {
         return res
@@ -41,7 +44,7 @@ const createItem = (req, res) => {
 // READ
 const getItems = (req, res) => {
   ClothingItem.find({})
-    .then((items) => res.status(200).send(items))
+    .then((items) => res.status(OK).send(items))
     .catch(() => {
       res
         .status(ERROR_SERVER)
@@ -55,7 +58,7 @@ const updateItem = (req, res) => {
 
   ClothingItem.findByIdAndUpdate(itemId, { $set: { imageURL } })
     .orFail()
-    .then((item) => res.status(200).send({ data: item }))
+    .then((item) => res.status(OK).send({ data: item }))
     .catch((error) => {
       res
         .status(ERROR_SERVER)
@@ -74,17 +77,28 @@ const deleteItem = (req, res) => {
       .send({ message: "Invalid item ID format" });
   }
 
-  return ClothingItem.findByIdAndDelete(itemId)
+  return ClothingItem.findById(itemId)
     .then((item) => {
       if (!item) {
         return res.status(ERROR_NOT_FOUND).send({ message: "Item not found" });
       }
 
-      // send the deleted item back as JSON
-      return res.send(item);
+      if (!item.owner.equals(req.user._id)) {
+        return res.status(FORBIDDEN).send({ messsage: "Access denied" });
+      }
+
+      return item.deleteOne();
     })
-    .catch(() => {
-      res
+    .then((deletedItem) => {
+      return res.send(deletedItem);
+    })
+    .catch((err) => {
+      if (err.name === "CastError") {
+        return res
+          .status(ERROR_BAD_REQUEST)
+          .send({ message: "Invalid Item ID" });
+      }
+      return res
         .status(ERROR_SERVER)
         .send({ message: "An error has occurred on the server." });
     });
