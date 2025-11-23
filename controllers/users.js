@@ -1,8 +1,8 @@
 // const { get } = require('mongoose');
-const user = require("../models/user");
-const bcrypt = require("bcryptjs"); // importing bcrypt
-const jwt = require("jsonwebtoken");
-const { JWT_SECRET } = require("../utils/config");
+const bcrypt = require('bcryptjs'); // importing bcrypt
+const jwt = require('jsonwebtoken');
+const User = require('../models/user');
+const { JWT_SECRET } = require('../utils/config');
 
 const {
   ERROR_BAD_REQUEST,
@@ -12,7 +12,7 @@ const {
   UNAUTHORIZED,
   CREATED,
   OK,
-} = require("../utils/errorCodes");
+} = require('../utils/errorCodes');
 
 // GET /users
 
@@ -27,21 +27,19 @@ const {
 //     });
 // };
 
-//create
+// create
 
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
-  //password hashing
+  // password hashing
   bcrypt
     .hash(password, 10)
-    .then((hash) => {
-      return user.create({
+    .then((hash) => User.create({
         email,
         name,
         avatar,
         password: hash,
-      });
-    })
+      }))
     .then((user) => {
       const userObject = user.toObject();
       delete userObject.password;
@@ -51,20 +49,20 @@ const createUser = (req, res) => {
       if (err.code === 11000) {
         return res
           .status(CONFLICT)
-          .send({ message: "That e-mail is already being used" }); //email duplicate verification
+          .send({ message: 'That e-mail is already being used' }); // email duplicate verification
       }
-      if (err.name === "ValidationError") {
+      if (err.name === 'ValidationError') {
         return res
           .status(ERROR_BAD_REQUEST)
-          .send({ message: "Invalid user data" });
+          .send({ message: 'Invalid user data' });
       }
       return res
         .status(ERROR_SERVER)
-        .send({ message: "An error occurred on the server" });
+        .send({ message: 'An error occurred on the server' });
     });
 };
 
-//login
+// login
 const logIn = (req, res) => {
   const { email, password } = req.body;
 
@@ -72,12 +70,12 @@ const logIn = (req, res) => {
     .findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
-        expiresIn: "7d",
+        expiresIn: '7d',
       });
       res.send({ token });
     })
     .catch(() => {
-      res.status(UNAUTHORIZED).send({ message: "Incorrect email or password" });
+      res.status(UNAUTHORIZED).send({ message: 'Incorrect email or password' });
     });
 };
 
@@ -91,21 +89,21 @@ const getCurrentUser = (req, res) => {
     .then((user) => res.status(OK).send(user))
     .catch((err) => {
       console.error(err);
-      if (err.name === "DocumentNotFoundError") {
-        return res.status(ERROR_NOT_FOUND).send({ message: "User not found" });
+      if (err.name === 'DocumentNotFoundError') {
+        return res.status(ERROR_NOT_FOUND).send({ message: 'User not found' });
       }
-      if (err.name === "CastError") {
+      if (err.name === 'CastError') {
         return res
           .status(ERROR_BAD_REQUEST)
-          .send({ message: "User not found" });
+          .send({ message: 'User not found' });
       }
       return res
         .status(ERROR_SERVER)
-        .send({ message: "An error occurred on the server" });
+        .send({ message: 'An error occurred on the server' });
     });
 };
 
-//updateuser
+// updateuser
 const updateUser = (req, res) => {
   const { name, avatar } = req.body;
   const userId = req.user._id;
@@ -118,15 +116,15 @@ const updateUser = (req, res) => {
     .orFail()
     .then((user) => res.status(OK).send({ data: user }))
     .catch((error) => {
-      if (error.name === "ValidationError") {
+      if (error.name === 'ValidationError') {
         return res
           .status(ERROR_BAD_REQUEST)
-          .json({ message: "Invalid user data " });
+          .json({ message: 'Invalid user data ' });
       }
-      if (error.name === "DocumentNotFoundError") {
-        return res.status(ERROR_NOT_FOUND).json({ message: "User not found " });
+      if (error.name === 'DocumentNotFoundError') {
+        return res.status(ERROR_NOT_FOUND).json({ message: 'User not found ' });
       }
-      return res.status(ERROR_SERVER).json({ message: "Error on the server" });
+      return res.status(ERROR_SERVER).json({ message: 'Error on the server' });
     });
 };
 
