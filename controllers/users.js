@@ -1,8 +1,8 @@
 // const { get } = require('mongoose');
-const bcrypt = require('bcryptjs'); // importing bcrypt
-const jwt = require('jsonwebtoken');
-const User = require('../models/user');
-const { JWT_SECRET } = require('../utils/config');
+const bcrypt = require("bcryptjs"); // importing bcrypt
+const jwt = require("jsonwebtoken");
+const User = require("../models/user");
+const { JWT_SECRET } = require("../utils/config");
 
 const {
   ERROR_BAD_REQUEST,
@@ -12,20 +12,7 @@ const {
   UNAUTHORIZED,
   CREATED,
   OK,
-} = require('../utils/errorCodes');
-
-// GET /users
-
-// const getUsers = (req, res) => {
-//   User.find({})
-//     .then((users) => res.send(users))
-//     .catch((err) => {
-//       console.error(err);
-//       return res
-//         .status(ERROR_SERVER)
-//         .send({ message: "An error has occurred on the server" });
-//     });
-// };
+} = require("../utils/errorCodes");
 
 // create
 
@@ -34,12 +21,14 @@ const createUser = (req, res) => {
   // password hashing
   bcrypt
     .hash(password, 10)
-    .then((hash) => User.create({
+    .then((hash) =>
+      User.create({
         email,
         name,
         avatar,
         password: hash,
-      }))
+      }),
+    )
     .then((user) => {
       const userObject = user.toObject();
       delete userObject.password;
@@ -49,16 +38,16 @@ const createUser = (req, res) => {
       if (err.code === 11000) {
         return res
           .status(CONFLICT)
-          .send({ message: 'That e-mail is already being used' }); // email duplicate verification
+          .send({ message: "That e-mail is already being used" }); // email duplicate verification
       }
-      if (err.name === 'ValidationError') {
+      if (err.name === "ValidationError") {
         return res
           .status(ERROR_BAD_REQUEST)
-          .send({ message: 'Invalid user data' });
+          .send({ message: "Invalid user data" });
       }
       return res
         .status(ERROR_SERVER)
-        .send({ message: 'An error occurred on the server' });
+        .send({ message: "An error occurred on the server" });
     });
 };
 
@@ -70,12 +59,12 @@ const logIn = (req, res) => {
     .findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
-        expiresIn: '7d',
+        expiresIn: "7d",
       });
       res.send({ token });
     })
     .catch(() => {
-      res.status(UNAUTHORIZED).send({ message: 'Incorrect email or password' });
+      res.status(UNAUTHORIZED).send({ message: "Incorrect email or password" });
     });
 };
 
@@ -83,23 +72,22 @@ const logIn = (req, res) => {
 const getCurrentUser = (req, res) => {
   const userId = req.user._id;
 
-  user
-    .findById(userId)
+  User.findById(userId)
     .orFail()
     .then((user) => res.status(OK).send(user))
     .catch((err) => {
       console.error(err);
-      if (err.name === 'DocumentNotFoundError') {
-        return res.status(ERROR_NOT_FOUND).send({ message: 'User not found' });
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(ERROR_NOT_FOUND).send({ message: "User not found" });
       }
-      if (err.name === 'CastError') {
+      if (err.name === "CastError") {
         return res
           .status(ERROR_BAD_REQUEST)
-          .send({ message: 'User not found' });
+          .send({ message: "User not found" });
       }
       return res
         .status(ERROR_SERVER)
-        .send({ message: 'An error occurred on the server' });
+        .send({ message: "An error occurred on the server" });
     });
 };
 
@@ -114,17 +102,17 @@ const updateUser = (req, res) => {
     { new: true, runValidators: true },
   )
     .orFail()
-    .then((user) => res.status(OK).send({ data: user }))
+    .then((User) => res.status(OK).send({ data: User }))
     .catch((error) => {
-      if (error.name === 'ValidationError') {
+      if (error.name === "ValidationError") {
         return res
           .status(ERROR_BAD_REQUEST)
-          .json({ message: 'Invalid user data ' });
+          .json({ message: "Invalid user data " });
       }
-      if (error.name === 'DocumentNotFoundError') {
-        return res.status(ERROR_NOT_FOUND).json({ message: 'User not found ' });
+      if (error.name === "DocumentNotFoundError") {
+        return res.status(ERROR_NOT_FOUND).json({ message: "User not found " });
       }
-      return res.status(ERROR_SERVER).json({ message: 'Error on the server' });
+      return res.status(ERROR_SERVER).json({ message: "Error on the server" });
     });
 };
 
