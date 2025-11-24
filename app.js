@@ -24,4 +24,11 @@ app.use((req, res, next) => {
 
 app.use("/", routes);
 
+// start server when this file is run directly
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  // eslint-disable-next-line no-console
+  console.log(`Server is running on port ${PORT}`);
+});
+
 module.exports = app;

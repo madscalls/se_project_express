@@ -19,31 +19,25 @@ const {
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
 
-  User.findOne({ email })
-    .then((existingUser) => {
-      if (existingUser) {
-        // email already in use -> 409 Conflict
-        return res
-          .status(CONFLICT)
-          .send({ message: "That e-mail is already being used" });
-      }
+  if (!email || !password || !name || !avatar) {
+    return res.status(ERROR_BAD_REQUEST).send({ message: "Invalid user data" });
+  }
 
-      // hash password and create user
-      return bcrypt
-        .hash(password, 10)
-        .then((hash) =>
-          User.create({
-            email,
-            name,
-            avatar,
-            password: hash,
-          }),
-        )
-        .then((user) => {
-          const userObject = user.toObject();
-          delete userObject.password;
-          return res.status(CREATED).send({ data: userObject });
-        });
+  // password hashing
+  bcrypt
+    .hash(password, 10)
+    .then((hash) =>
+      User.create({
+        email,
+        name,
+        avatar,
+        password: hash,
+      }),
+    )
+    .then((user) => {
+      const userObject = user.toObject();
+      delete userObject.password;
+      res.status(CREATED).send({ data: userObject });
     })
     .catch((err) => {
       if (err.code === 11000) {
