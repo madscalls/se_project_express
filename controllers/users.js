@@ -60,6 +60,12 @@ const createUser = (req, res) => {
 const logIn = (req, res) => {
   const { email, password } = req.body;
 
+  if (!email || !password) {
+    return res.status(ERROR_BAD_REQUEST).json({
+      message: "Email and password are required",
+    });
+  }
+
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {

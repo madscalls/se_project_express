@@ -14,7 +14,6 @@ const {
 const createItem = (req, res) => {
   const { name, imageUrl, weather } = req.body;
   const owner = req.user._id;
-  // min and maxlength validation
   if (!name || name.length < 2) {
     return res.status(ERROR_BAD_REQUEST).send({ message: "Name too short" });
   }
@@ -29,8 +28,6 @@ const createItem = (req, res) => {
   })
     .then((item) => res.status(CREATED).send(item))
     .catch((err) => {
-      console.error("❌ createItem error:", err.name, err.message, err.code);
-
       if (err.name === "ValidationError") {
         return res
           .status(ERROR_BAD_REQUEST)
@@ -87,9 +84,8 @@ const deleteItem = (req, res) => {
         return res.status(FORBIDDEN).send({ messsage: "Access denied" });
       }
 
-      return item.deleteOne();
+      return item.deleteOne().then((deletedItem) => res.send(deletedItem));
     })
-    .then((deletedItem) => res.send(deletedItem))
     .catch((err) => {
       if (err.name === "CastError") {
         return res
