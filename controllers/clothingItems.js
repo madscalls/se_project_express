@@ -81,7 +81,7 @@ const deleteItem = (req, res) => {
       }
 
       if (!item.owner.equals(req.user._id)) {
-        return res.status(FORBIDDEN).send({ messsage: 'Access denied' });
+        return res.status(FORBIDDEN).send({ message: 'Access denied' });
       }
 
       return item.deleteOne().then((deletedItem) => res.send(deletedItem));
