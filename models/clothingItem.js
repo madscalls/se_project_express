@@ -10,18 +10,18 @@ const ClothingItem = new mongoose.Schema({
     minlength: 2,
     maxlength: 30,
   },
-  weather: { type: String, required: true, enum: ['hot', 'warm', 'cold'] },
+  weather: { type: String, required: true, enum: ['hot', 'warm', 'cold'] }, // finite allowed data types
   imageUrl: {
     type: String,
     required: true,
     validate: {
       validator(value) {
-        return validator.isURL(value);
+        return validator.isURL(value); // validation
       },
       message: 'Invalid URL format',
     },
   },
-  owner: { type: ObjectId, ref: 'user', required: true },
+  owner: { type: ObjectId, ref: 'user', required: true }, // object identification for likes
   likes: {
     type: [{ type: ObjectId, ref: 'user' }],
     default: [],
