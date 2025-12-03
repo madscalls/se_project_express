@@ -100,6 +100,38 @@ const getCurrentUser = (req, res) => {
     });
 };
 
+//
+const getUsers = (req, res) => {
+  User.find({})
+    .then((users) => res.status(OK).send(users))
+    .catch(() => {
+      res
+        .status(ERROR_SERVER)
+        .send({ message: 'An error occurred on the server' });
+    });
+};
+
+const getUser = (req, res) => {
+  const { userId } = req.params;
+
+  User.findById(userId)
+    .orFail()
+    .then((user) => res.status(OK).send(user))
+    .catch((err) => {
+      if (err.name === 'DocumentNotFoundError') {
+        return res.status(ERROR_NOT_FOUND).send({ message: 'User not found' });
+      }
+      if (err.name === 'CastError') {
+        return res
+          .status(ERROR_BAD_REQUEST)
+          .send({ message: 'Invalid user ID' });
+      }
+      return res
+        .status(ERROR_SERVER)
+        .send({ message: 'An error occurred on the server' });
+    });
+};
+
 // updateuser
 const updateUser = (req, res) => {
   const { name, avatar } = req.body;
@@ -125,4 +157,11 @@ const updateUser = (req, res) => {
     });
 };
 
-module.exports = { createUser, getCurrentUser, logIn, updateUser };
+module.exports = {
+  createUser,
+  getCurrentUser,
+  logIn,
+  updateUser,
+  getUsers,
+  getUser,
+};
