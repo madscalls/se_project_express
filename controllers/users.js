@@ -1,8 +1,8 @@
 // const { get } = require('mongoose');
-const bcrypt = require('bcryptjs'); // importing bcrypt
-const jwt = require('jsonwebtoken');
-const User = require('../models/user');
-const { JWT_SECRET } = require('../utils/config');
+const bcrypt = require("bcryptjs"); // importing bcrypt
+const jwt = require("jsonwebtoken");
+const User = require("../models/user");
+const { JWT_SECRET } = require("../utils/config");
 
 const {
   ERROR_BAD_REQUEST,
@@ -12,7 +12,7 @@ const {
   UNAUTHORIZED,
   CREATED,
   OK,
-} = require('../utils/errorCodes');
+} = require("../errors/errorCodesRef");
 
 // create
 
@@ -20,7 +20,7 @@ const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
 
   if (!email || !password || !name || !avatar) {
-    return res.status(ERROR_BAD_REQUEST).send({ message: 'Invalid user data' });
+    return res.status(ERROR_BAD_REQUEST).send({ message: "Invalid user data" });
   }
 
   // password hashing
@@ -43,16 +43,16 @@ const createUser = (req, res) => {
       if (err.code === 11000) {
         return res
           .status(CONFLICT)
-          .send({ message: 'That e-mail is already being used' });
+          .send({ message: "That e-mail is already being used" });
       }
-      if (err.name === 'ValidationError') {
+      if (err.name === "ValidationError") {
         return res
           .status(ERROR_BAD_REQUEST)
-          .send({ message: 'Invalid user data' });
+          .send({ message: "Invalid user data" });
       }
       return res
         .status(ERROR_SERVER)
-        .send({ message: 'An error occurred on the server' });
+        .send({ message: "An error occurred on the server" });
     });
 };
 
@@ -62,19 +62,19 @@ const logIn = (req, res) => {
 
   if (!email || !password) {
     return res.status(ERROR_BAD_REQUEST).json({
-      message: 'Email and password are required',
+      message: "Email and password are required",
     });
   }
 
   return User.findUserByCredentials(email, password) // bcrypt.compare to check pass
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
-        expiresIn: '7d',
+        expiresIn: "7d",
       });
       res.send({ token }); // adds token on succsess
     })
     .catch(() => {
-      res.status(UNAUTHORIZED).send({ message: 'Incorrect email or password' }); // error msg for fail
+      res.status(UNAUTHORIZED).send({ message: "Incorrect email or password" }); // error msg for fail
     });
 };
 
@@ -86,17 +86,17 @@ const getCurrentUser = (req, res) => {
     .orFail()
     .then((user) => res.status(OK).send(user))
     .catch((err) => {
-      if (err.name === 'DocumentNotFoundError') {
-        return res.status(ERROR_NOT_FOUND).send({ message: 'User not found' });
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(ERROR_NOT_FOUND).send({ message: "User not found" });
       }
-      if (err.name === 'CastError') {
+      if (err.name === "CastError") {
         return res
           .status(ERROR_BAD_REQUEST)
-          .send({ message: 'User not found' });
+          .send({ message: "User not found" });
       }
       return res
         .status(ERROR_SERVER)
-        .send({ message: 'An error occurred on the server' });
+        .send({ message: "An error occurred on the server" });
     });
 };
 
@@ -145,15 +145,15 @@ const updateUser = (req, res) => {
     .orFail()
     .then((user) => res.status(OK).send({ data: user }))
     .catch((error) => {
-      if (error.name === 'ValidationError') {
+      if (error.name === "ValidationError") {
         return res
           .status(ERROR_BAD_REQUEST)
-          .json({ message: 'Invalid user data ' });
+          .json({ message: "Invalid user data " });
       }
-      if (error.name === 'DocumentNotFoundError') {
-        return res.status(ERROR_NOT_FOUND).json({ message: 'User not found ' });
+      if (error.name === "DocumentNotFoundError") {
+        return res.status(ERROR_NOT_FOUND).json({ message: "User not found " });
       }
-      return res.status(ERROR_SERVER).json({ message: 'Error on the server' });
+      return res.status(ERROR_SERVER).json({ message: "Error on the server" });
     });
 };
 

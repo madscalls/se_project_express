@@ -9,10 +9,11 @@ const validateURL = (value, helpers) => {
 };
 
 // 1. Clothing item body validation (already provided as example)
-module.exports.validateCardBody = celebrate({
+module.exports.validateClothingItem = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
     imageUrl: Joi.string().required().custom(validateURL),
+    weather: Joi.string().required.valid("hot", "warm", "cold"),
   }),
 });
 

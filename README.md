@@ -6,27 +6,27 @@ Node.js, Express, MongoDB, Mongoose, ESLint, React, Google Cloud, Nginx, pm2, ce
 
 ###
 
-Functionality
+### Functionality
 
-## Created and configured a server
+# Created and configured a server
 
-## Uses pm2 to keep servers live
+# Uses pm2 to keep servers live
 
-## Registered & Certified domains with certbot
+# Registered & Certified domains with certbot
 
-## Configured ports with nginx to create a reverse proxy server
+# Configured ports with nginx to create a reverse proxy server
 
-Ultimatley leaving us with a live working social platform that can:
+### Ultimatley leaving us with a live working social platform that can:
 
-## Create, retrieve, and delete clothing items
+# Create, retrieve, and delete clothing items
 
-## Manage user data
+# Manage user data
 
-## Allow users to like or unlike items
+# Allow users to like or unlike items
 
-## Validating data and handling errors gracefully
+# Validating data and handling errors gracefully
 
-# Usage demo
+## Usage demo
 
 ![App Demo](./wtwrdemovid2026.gif)
 
