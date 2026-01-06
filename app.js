@@ -18,25 +18,18 @@ mongoose
 app.use(express.json());
 app.use(cors());
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: "690d6b2f7256ef523081eecb",
-  };
-  next();
+//crash resistance
+app.get("/crash-test", () => {
+  setTimeout(() => {
+    throw new Error("Server will crash now");
+  }, 0);
 });
-app.use(requestLogger);
 
 app.use("/", routes);
 
 app.use(errorLogger); // enabling the error logger
 
 app.use(errors());
-
-//centralized error handler
-app.use((err, req, res, next) => {
-  console.error(err);
-  return res.status(500).send({ message: "An error occurred on the server" });
-});
 
 // start server when this file is run directly
 const PORT = process.env.PORT || 3001;

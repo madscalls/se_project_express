@@ -1,7 +1,4 @@
-// .catch((err) => {
-//     if (err.name === "CastError") {
-//       next(new BadRequestError("The id string is in an invalid format");
-//     } else {
-//       next(err);
-//     }
-//   );
+app.use((err, req, res, next) => {
+  console.error(err);
+  return res.status(500).send({ message: "An error occurred on the server" });
+});
