@@ -28,6 +28,8 @@ app.get("/crash-test", () => {
 app.use("/", routes);
 
 app.use(errorLogger);
+// mount the error handler
+// app.use(errHand..)
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

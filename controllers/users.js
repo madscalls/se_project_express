@@ -4,15 +4,14 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const { JWT_SECRET } = require("../utils/config");
 
-const {
-  ERROR_BAD_REQUEST,
-  ERROR_NOT_FOUND,
-  ERROR_SERVER,
-  CONFLICT,
-  UNAUTHORIZED,
-  CREATED,
-  OK,
-} = require("../errors/errorCodesRef");
+//errors
+const BadRequestError = require("../errors/BadRequestError");
+const NotFoundError = require("../errors/NotFoundError");
+const ConflictError = require("../errors/ConflictError");
+const UnauthorizedError = require("../errors/UnauthorizedError");
+const ServerError = require("../errors/ServerError");
+const OkRes = require("../errors/OkRes");
+const CreatedRes = require("../errors/CreatedRes");
 
 // create
 
@@ -20,7 +19,9 @@ const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
 
   if (!email || !password || !name || !avatar) {
-    return res.status(ERROR_BAD_REQUEST).send({ message: "Invalid user data" });
+    // return res.status(BadRequestError).send({ message: "Invalid user data" });
+    throw new BadRequestError("Invalid user data");
+    // tests
   }
 
   // password hashing
@@ -37,22 +38,26 @@ const createUser = (req, res) => {
     .then((user) => {
       const userObject = user.toObject();
       delete userObject.password;
-      res.status(CREATED).send({ data: userObject });
+      // res.status(CreatedRes).send({ data: userObject });
+      throw new CreatedRes();
     })
     .catch((err) => {
       if (err.code === 11000) {
-        return res
-          .status(CONFLICT)
-          .send({ message: "That e-mail is already being used" });
+        //return res;
+        //    .status(ConflictError)
+        //    .send({ message: "That e-mail is already being used" });
+        throw new ConflictError();
       }
       if (err.name === "ValidationError") {
-        return res
-          .status(ERROR_BAD_REQUEST)
-          .send({ message: "Invalid user data" });
+        //return res;
+        //     .status(BadRequestError)
+        //     .send({ message: "Invalid user data" });
+        throw new BadRequestError();
       }
-      return res
-        .status(ERROR_SERVER)
-        .send({ message: "An error occurred on the server" });
+      //return res;
+      //    .status(ServerError)
+      //    .send({ message: "An error occurred on the server" });
+      throw new ServerError();
     });
 };
 
@@ -61,9 +66,10 @@ const logIn = (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(ERROR_BAD_REQUEST).json({
-      message: "Email and password are required",
-    });
+    // return res.status(BadRequestError).json({
+    //   message: "Email and password are required",
+    // });
+    throw new BadRequestError();
   }
 
   return User.findUserByCredentials(email, password) // bcrypt.compare to check pass
@@ -74,7 +80,10 @@ const logIn = (req, res) => {
       res.send({ token }); // adds token on succsess
     })
     .catch(() => {
-      res.status(UNAUTHORIZED).send({ message: "Incorrect email or password" }); // error msg for fail
+      //res
+      //  .status(UnauthorizedError)
+      //  .send({ message: "Incorrect email or password" }); // error msg for fail
+      throw new UnauthorizedError();
     });
 };
 
@@ -84,19 +93,20 @@ const getCurrentUser = (req, res) => {
 
   User.findById(userId)
     .orFail()
-    .then((user) => res.status(OK).send(user))
+    .then((user) => res.status(OkRes).send(user))
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
-        return res.status(ERROR_NOT_FOUND).send({ message: "User not found" });
+        //  return res.status(NotFoundError).send({ message: "User not found" });
+        throw new NotFoundError();
       }
       if (err.name === "CastError") {
-        return res
-          .status(ERROR_BAD_REQUEST)
-          .send({ message: "User not found" });
+        //  return res.status(BadRequestError).send({ message: "User not found" });
+        throw new BadRequestError();
       }
-      return res
-        .status(ERROR_SERVER)
-        .send({ message: "An error occurred on the server" });
+      //  return res
+      //    .status(ServerError)
+      //    .send({ message: "An error occurred on the server" });
+      throw new ServerError();
     });
 };
 
@@ -106,7 +116,8 @@ const getCurrentUser = (req, res) => {
 //     .then((users) => res.status(OK).send(users))
 //     .catch(() => {
 //       res
-//         .status(ERROR_SERVER)
+//         .status(ServerError
+//)
 //         .send({ message: 'An error occurred on the server' });
 //     });
 // };
@@ -119,15 +130,17 @@ const getCurrentUser = (req, res) => {
 //     .then((user) => res.status(OK).send(user))
 //     .catch((err) => {
 //       if (err.name === 'DocumentNotFoundError') {
-//         return res.status(ERROR_NOT_FOUND).send({ message: 'User not found' });
+//         return res.status(NotFoundError
+//).send({ message: 'User not found' });
 //       }
 //       if (err.name === 'CastError') {
 //         return res
-//           .status(ERROR_BAD_REQUEST)
+//           .status(BadRequestError  )
 //           .send({ message: 'Invalid user ID' });
 //       }
 //       return res
-//         .status(ERROR_SERVER)
+//         .status(ServerError
+//)
 //         .send({ message: 'An error occurred on the server' });
 //     });
 // };
@@ -143,17 +156,20 @@ const updateUser = (req, res) => {
     { new: true, runValidators: true },
   )
     .orFail()
-    .then((user) => res.status(OK).send({ data: user }))
+    .then((user) => res.status(OkRes).send({ data: user }))
     .catch((error) => {
       if (error.name === "ValidationError") {
-        return res
-          .status(ERROR_BAD_REQUEST)
-          .json({ message: "Invalid user data " });
+        // return res
+        //   .status(BadRequestError)
+        //   .json({ message: "Invalid user data " });
+        throw new BadRequestError();
       }
       if (error.name === "DocumentNotFoundError") {
-        return res.status(ERROR_NOT_FOUND).json({ message: "User not found " });
+        //  return res.status(NotFoundError).json({ message: "User not found " });
+        throw new NotFoundError();
       }
-      return res.status(ERROR_SERVER).json({ message: "Error on the server" });
+      // return res.status(ServerError).json({ message: "Error on the server" });
+      throw new ServerError();
     });
 };
 
