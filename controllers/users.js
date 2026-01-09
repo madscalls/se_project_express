@@ -10,18 +10,15 @@ const NotFoundError = require("../errors/NotFoundError");
 const ConflictError = require("../errors/ConflictError");
 const UnauthorizedError = require("../errors/UnauthorizedError");
 const ServerError = require("../errors/ServerError");
-const OkRes = require("../errors/OkRes");
 const CreatedRes = require("../errors/CreatedRes");
-
 // create
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
 
   if (!email || !password || !name || !avatar) {
-    // return res.status(BadRequestError).send({ message: "Invalid user data" });
+    console.log("Some bug");
     throw new BadRequestError("Invalid user data");
-    // tests
   }
 
   // password hashing
@@ -38,38 +35,26 @@ const createUser = (req, res) => {
     .then((user) => {
       const userObject = user.toObject();
       delete userObject.password;
-      // res.status(CreatedRes).send({ data: userObject });
-      throw new CreatedRes();
+      res.status(201).send({ data: userObject });
     })
     .catch((err) => {
       if (err.code === 11000) {
-        //return res;
-        //    .status(ConflictError)
-        //    .send({ message: "That e-mail is already being used" });
-        throw new ConflictError();
+        throw new ConflictError("That e-mail is already being used");
       }
       if (err.name === "ValidationError") {
-        //return res;
-        //     .status(BadRequestError)
-        //     .send({ message: "Invalid user data" });
-        throw new BadRequestError();
+        throw new BadRequestError("Invalid user data");
       }
-      //return res;
-      //    .status(ServerError)
-      //    .send({ message: "An error occurred on the server" });
-      throw new ServerError();
-    });
+      throw new ServerError("An error occurred on the server");
+    })
+    .catch(next);
 };
 
 // login
-const logIn = (req, res) => {
+const logIn = (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    // return res.status(BadRequestError).json({
-    //   message: "Email and password are required",
-    // });
-    throw new BadRequestError();
+    throw new BadRequestError("Email and password are required");
   }
 
   return User.findUserByCredentials(email, password) // bcrypt.compare to check pass
@@ -80,34 +65,29 @@ const logIn = (req, res) => {
       res.send({ token }); // adds token on succsess
     })
     .catch(() => {
-      //res
-      //  .status(UnauthorizedError)
-      //  .send({ message: "Incorrect email or password" }); // error msg for fail
-      throw new UnauthorizedError();
-    });
+      throw new UnauthorizedError("Incorrect email or password");
+    })
+    .catch(next);
 };
 
 // GET /users/:userId
-const getCurrentUser = (req, res) => {
+const getCurrentUser = (req, res, next) => {
   const userId = req.user._id;
 
   User.findById(userId)
     .orFail()
-    .then((user) => res.status(OkRes).send(user))
+    .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
-        //  return res.status(NotFoundError).send({ message: "User not found" });
-        throw new NotFoundError();
+        throw new NotFoundError("User not found");
       }
       if (err.name === "CastError") {
-        //  return res.status(BadRequestError).send({ message: "User not found" });
-        throw new BadRequestError();
+        throw new BadRequestError("User not found");
       }
-      //  return res
-      //    .status(ServerError)
-      //    .send({ message: "An error occurred on the server" });
-      throw new ServerError();
-    });
+
+      throw new ServerError("An error occurred on the server");
+    })
+    .catch(next);
 };
 
 //
@@ -146,7 +126,7 @@ const getCurrentUser = (req, res) => {
 // };
 
 // updateuser
-const updateUser = (req, res) => {
+const updateUser = (req, res, next) => {
   const { name, avatar } = req.body;
   const userId = req.user._id;
 
@@ -156,20 +136,15 @@ const updateUser = (req, res) => {
     { new: true, runValidators: true },
   )
     .orFail()
-    .then((user) => res.status(OkRes).send({ data: user }))
+    .then((user) => res.status(200).send({ data: user }))
     .catch((error) => {
       if (error.name === "ValidationError") {
-        // return res
-        //   .status(BadRequestError)
-        //   .json({ message: "Invalid user data " });
-        throw new BadRequestError();
+        throw new BadRequestError("Invalid user data ");
       }
       if (error.name === "DocumentNotFoundError") {
-        //  return res.status(NotFoundError).json({ message: "User not found " });
-        throw new NotFoundError();
+        throw new NotFoundError("User not found ");
       }
-      // return res.status(ServerError).json({ message: "Error on the server" });
-      throw new ServerError();
+      throw new ServerError("Error on the server");
     });
 };
 
