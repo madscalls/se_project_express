@@ -17,8 +17,8 @@ router.post("/signin", validateAuthentication, logIn);
 router.post("/signup", validateUserBody, createUser);
 
 // 404 handler
-router.use((req, res) => {
-  throw new NotFoundError("Requested resource not found");
+router.use((_req, _res, next) => {
+  next(new NotFoundError("Requested resource not found"));
 });
 
 module.exports = router;

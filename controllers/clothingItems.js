@@ -31,12 +31,13 @@ const createItem = (req, res) => {
 };
 
 // READ
-const getItems = (req, res) => {
+const getItems = (req, res, next) => {
   ClothingItem.find({})
     .then((items) => res.status(200).send(items))
-    .catch(() => {
-      throw new ServerError("An error has occurred on the server.");
-    });
+    .catch(next);
+  // => {
+  //   throw new ServerError("An error has occurred on the server.");
+  // });
 };
 // UPDATE
 const updateItem = (req, res) => {

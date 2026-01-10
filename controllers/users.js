@@ -4,20 +4,19 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const { JWT_SECRET } = require("../utils/config");
 
-//errors
+// errors
 const BadRequestError = require("../errors/BadRequestError");
 const NotFoundError = require("../errors/NotFoundError");
 const ConflictError = require("../errors/ConflictError");
 const UnauthorizedError = require("../errors/UnauthorizedError");
 const ServerError = require("../errors/ServerError");
-const CreatedRes = require("../errors/CreatedRes");
+// const CreatedRes = require("../errors/CreatedRes");
 // create
 
 const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
 
   if (!email || !password || !name || !avatar) {
-    console.log("Some bug");
     throw new BadRequestError("Invalid user data");
   }
 
@@ -97,7 +96,7 @@ const getCurrentUser = (req, res, next) => {
 //     .catch(() => {
 //       res
 //         .status(ServerError
-//)
+// )
 //         .send({ message: 'An error occurred on the server' });
 //     });
 // };
@@ -111,7 +110,7 @@ const getCurrentUser = (req, res, next) => {
 //     .catch((err) => {
 //       if (err.name === 'DocumentNotFoundError') {
 //         return res.status(NotFoundError
-//).send({ message: 'User not found' });
+// ).send({ message: 'User not found' });
 //       }
 //       if (err.name === 'CastError') {
 //         return res
@@ -120,7 +119,7 @@ const getCurrentUser = (req, res, next) => {
 //       }
 //       return res
 //         .status(ServerError
-//)
+// )
 //         .send({ message: 'An error occurred on the server' });
 //     });
 // };

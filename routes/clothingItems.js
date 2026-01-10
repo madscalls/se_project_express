@@ -13,19 +13,19 @@ const {
 } = require("../controllers/clothingItems");
 
 // CREATE
-router.post("/", auth, validateClothingItem, validateId, createItem);
+router.post("/", auth, validateClothingItem, createItem);
 
 // READ
 router.get("/", getItems);
 
 // UPDATE
-router.put("/:itemId", auth);
+// router.put("/:itemId", auth);
 
 // DELETE
 
-router.delete("/:itemId", auth, deleteItem);
+router.delete("/:itemId", auth, validateId, deleteItem);
 
-router.put("/:itemId/likes", auth, likeItem);
-router.delete("/:itemId/likes", auth, dislikeItem);
+router.put("/:itemId/likes", auth, validateId, likeItem);
+router.delete("/:itemId/likes", auth, validateId, dislikeItem);
 
 module.exports = router;
